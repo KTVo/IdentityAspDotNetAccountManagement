@@ -1,10 +1,25 @@
+using DotNet9EFAPI.MVCS.Services._DB;
+using DotNet9EFAPI.MVCS.Services.Test;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddControllers();
 
+// ADD DEPENDENCY INJECTIONS TO IOC
+builder.Services.AddScoped<ITestService, TestService>();
+
+builder.Services.AddDbContext<TestDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 var app = builder.Build();
+
+// Middleware
+app.UseRouting();
+app.UseAuthorization();
+
+app.MapControllers(); 
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

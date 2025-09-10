@@ -4,3 +4,8 @@ GET {{DotNet9EFAPI_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+POST {{DotNet9EFAPI_HostAddress}}/api/v1/test/get/all/items
+Accept: application/json
+
+###

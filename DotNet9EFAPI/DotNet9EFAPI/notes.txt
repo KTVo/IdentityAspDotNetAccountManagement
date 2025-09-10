@@ -1,0 +1,20 @@
+Entity Framework:
+    Entity Framework is an ORM (Object-Relational Mapping). So, essentially it connects the C# model class to 
+    the database table.
+
+    There is a Code First (Model First) and Database First approach.
+
+    dotnet add package Microsoft.EntityFrameworkCore
+    dotnet add package Microsoft.EntityFrameworkCore.Tools
+    dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+
+    To migrate your C# models to database (Code First Approach):
+
+            dotnet ef migrations add InitialCreate --context MyAppContext
+
+            dotnet ef database update 
+
+    To migrate your database tables into your C# project as models (Database First Approach):
+        PM> <NAME_FOR_DB_CONTEXT> "Data Source=<SQL_SERVER_NAME"; Initial
+        Catalog=MenuBlazor_Data; Integrated Security=True;Pooling=False; Encrypt=False;Trust Server Certificate=True" 
+        Microsoft.EntityFrameworkCore.SqlServer -ContextDir Data -OutputDir Models - DataAnnotation
