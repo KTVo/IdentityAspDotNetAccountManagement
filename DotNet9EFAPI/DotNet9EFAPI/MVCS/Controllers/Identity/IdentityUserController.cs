@@ -23,13 +23,17 @@ public class IdentityUserAuthentication : ControllerBase
     [Route("register/user")]
     public async Task<IActionResult> SignUpUser([FromBody] CreateUserRequest createUserRequest)
     {
-        if (createUserRequest.User == null) { return BadRequest(AppMessages.NullParameter);}
+        // CHECKS FOR NULLS
+        if (createUserRequest.User == null) { return BadRequest(AppMessages.NullParameter); }
         if (createUserRequest.User.PasswordHash == null) { return BadRequest(AppMessages.NullPasswordParameter); }
 
+        // CREATES USER ON DATABASE
         bool createUserResult = await _identityUserSerivce.CreateUserAsync(createUserRequest.User);
 
+        // INSTANTIATE RESPONSE CLASS
         CreateUserResponse createUserResponse = new CreateUserResponse();
 
+        // IF IDENTITY FAILS TO CREATE A USER ON DATABASE
         if (createUserResult == false)
         {
             createUserResponse.IsSuccessful = false;
@@ -39,6 +43,7 @@ public class IdentityUserAuthentication : ControllerBase
             return BadRequest(createUserResponse);
         }
 
+        // RETURNS CREATED USERS SUCCESS OBJECT
         createUserResponse.IsSuccessful = true;
         createUserResponse.StatusCode = 200;
         createUserResponse.Message = AppMessages.CreatedUserSuccess;

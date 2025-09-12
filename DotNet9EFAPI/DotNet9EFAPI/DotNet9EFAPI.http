@@ -15,8 +15,8 @@ Accept: application/json
 
 {
   "user": {
-    "userName": "kevin2.vo",
-    "email": "kevin.vo2@example.com",
+    "userName": "kevin4.vo",
+    "email": "kevin.vo4@example.com",
     "passwordHash": "Str0ngP@ssword1231!",
     "firstName": "Kevin",
     "lastName": "Vo",

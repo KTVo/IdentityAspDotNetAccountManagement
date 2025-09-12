@@ -6,7 +6,7 @@ using DotNet9EFAPI.MVCS.Services.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<User>()
@@ -34,9 +34,7 @@ builder.Services
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-
-
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.MapIdentityApi<User>();
 
