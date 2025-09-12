@@ -14,10 +14,12 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "userName": "kevin.vo",
-  "email": "kevin.vo@example.com",
-  "passwordHash": "Str0ngP@ssword1231!",
-  "firstName": "Kevin",
-  "lastName": "Vo",
-  "phoneNumber": "555-123-4567"
+  "user": {
+    "userName": "kevin2.vo",
+    "email": "kevin.vo2@example.com",
+    "passwordHash": "Str0ngP@ssword1231!",
+    "firstName": "Kevin",
+    "lastName": "Vo",
+    "phoneNumber": "555-123-4567"
+  }
 }

@@ -1,6 +1,8 @@
-using DotNet9EFAPI.MVCS.Models.Identity;
+using System.Security.Principal;
+using DotNet9EFAPI.MVCS.Models._DB.Identity;
 using DotNet9EFAPI.MVCS.Services._DB;
-using DotNet9EFAPI.MVCS.Services.Test;
+using DotNet9EFAPI.MVCS.Services._DB.Identity;
+using DotNet9EFAPI.MVCS.Services.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +18,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 
 // ADD DEPENDENCY INJECTIONS TO IOC
-builder.Services.AddScoped<ITestService, TestService>();
+builder.Services
+    .AddScoped<IIdentityUserService, IdentityUserService>();
 
 builder.Services.AddDbContext<TestDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
