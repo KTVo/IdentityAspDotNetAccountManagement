@@ -16,6 +16,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.9" />
+    <PackageReference Include="Scalar.AspNetCore.Microsoft" Version="2.7.2" />
   </ItemGroup>
 
 </Project>

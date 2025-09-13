@@ -5,6 +5,7 @@ using DotNet9EFAPI.MVCS.Services._DB.Identity;
 using DotNet9EFAPI.MVCS.Services.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -45,12 +46,13 @@ app.MapIdentityApi<User>();
 app.UseRouting();
 app.UseAuthorization();
 
-app.MapControllers(); 
+app.MapControllers();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
