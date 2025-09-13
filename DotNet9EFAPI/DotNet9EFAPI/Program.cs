@@ -28,6 +28,9 @@ builder.Services
     {
         options.User.RequireUniqueEmail = true;
         // configure password/lockout/etc here if you want
+        options.SignIn.RequireConfirmedAccount = false;
+        options.SignIn.RequireConfirmedEmail = false;
+        options.SignIn.RequireConfirmedPhoneNumber = false;
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<TestDBContext>()
