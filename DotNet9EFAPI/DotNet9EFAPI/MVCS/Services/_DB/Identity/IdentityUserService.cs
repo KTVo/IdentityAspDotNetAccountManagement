@@ -1,25 +1,26 @@
 using System.Diagnostics;
 using DotNet9EFAPI.MVCS.Models._DB.Identity;
-using DotNet9EFAPI.MVCS.Models.CRUD.Identity;
 using DotNet9EFAPI.MVCS.Services._DB.Identity;
+using DotNet9EFAPI.MVCS.Services._DB.JWT;
 using DotNet9EFAPI.Statics.Messages.App;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 
 namespace DotNet9EFAPI.MVCS.Services.Identity;
 
-public class IdentityUserService : IIdentityUserService
+public sealed class IdentityUserService : IIdentityUserService
 {
     // IDENTITY THAT OBJECT FOR MANAGING USER
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
+    private readonly ITokenProvider _tokenProvider;
 
     // CONSTRUCTOR
-    public IdentityUserService(UserManager<User> userManager, SignInManager<User> signInManager)
+    public IdentityUserService(UserManager<User> userManager, SignInManager<User> signInManager, ITokenProvider tokenProvider)
     {
         // ASSIGNS DEPENDENCY INJECTED IDENTITY INSTANCES TO CLASS VARIABLE
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
+        _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
     }
 
     /// <summary>
@@ -50,21 +51,30 @@ public class IdentityUserService : IIdentityUserService
     /// </summary>
     /// <param name="user"></param>
     /// <returns>A BOOLEAN ON CREATE USER STATUS</returns>
-    public async Task<bool> LogInUserAsync(string username, string password)
+    public async Task<string?> LogInUserAsync(string username, string password)
     {
         try
         {
-#pragma warning disable CS8604 // Possible null reference argument.
-            SignInResult loginUserResult = await _signInManager.PasswordSignInAsync(
-                username, password, isPersistent: false, lockoutOnFailure: false);
-#pragma warning restore CS8604 // Possible null reference argument.
+            // FIND USER FROM DB
+            User? user = await _userManager.FindByNameAsync(username);
+            if (user == null) { return null; }
 
-            return loginUserResult.Succeeded;
+            // USES IDENTITY TO VALIDATE CREDENTIALS ON DB
+            bool valid = await _userManager.CheckPasswordAsync(user, password);
+
+            if (valid == false) { return null; }
+            
+
+            string? token = _tokenProvider.Create(user);
+            return token;
+            
+
+           
         }
         catch (Exception e)
         {
             Debug.WriteLine(AppMessages.LoggingInUserFailed + " -> " + e.Message);
-            return false;
+            return null;
         }
 
     }

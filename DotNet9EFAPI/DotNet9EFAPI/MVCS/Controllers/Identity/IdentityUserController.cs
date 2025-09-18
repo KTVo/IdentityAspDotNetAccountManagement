@@ -1,25 +1,27 @@
-using System.Runtime.CompilerServices;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using DotNet9EFAPI.MVCS.Models._DB.Identity;
 using DotNet9EFAPI.MVCS.Models.CRUD.Identity;
 using DotNet9EFAPI.MVCS.Services._DB.Identity;
+using DotNet9EFAPI.MVCS.Services._DB.JWT;
 using DotNet9EFAPI.Statics.Messages.App;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.IdentityModel.Tokens;
 namespace DotNet9EFAPI.MVCS.Controllers;
 
-[ApiController]
 [Route("api/v1/user")]
-[AllowAnonymous]
+[ApiController]
 public class IdentityUserAuthentication : ControllerBase
 {
     private readonly IIdentityUserService _identityUserSerivce;
-    
+    public readonly ITokenProvider _tokenProvider;
 
-    public IdentityUserAuthentication(IIdentityUserService identityUserService)
+
+    public IdentityUserAuthentication(IIdentityUserService identityUserService, ITokenProvider tokenProvider, IConfiguration configuration)
     {
         _identityUserSerivce = identityUserService ?? throw new ArgumentNullException(nameof(identityUserService));
+        _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
     }
 
     [HttpPost]
@@ -30,9 +32,8 @@ public class IdentityUserAuthentication : ControllerBase
         if (loginUserRequest.Username == null) { return BadRequest(AppMessages.NullParameter + nameof(loginUserRequest.Username)); }
         if (loginUserRequest.Password == null) { return BadRequest(AppMessages.NullParameter + nameof(loginUserRequest.Password)); }
 
-
-        bool isLoggedIn = await _identityUserSerivce.LogInUserAsync(loginUserRequest.Username, loginUserRequest.Password);
-        return Ok(isLoggedIn);
+        string? userToken = await _identityUserSerivce.LogInUserAsync(loginUserRequest.Username, loginUserRequest.Password);
+        return Ok(userToken);
     }
 
     [HttpPost]
@@ -78,8 +79,21 @@ public class IdentityUserAuthentication : ControllerBase
         createUserResponse.IsSuccessful = true;
         createUserResponse.StatusCode = 200;
         createUserResponse.Message = AppMessages.CreatedUserSuccess;
-        
+
         return Ok(createUserResponse);
+    }
+
+    [HttpPost]
+    [Route("test/token")]
+    public IActionResult TestToken([FromBody] UserAuthenticationRequest userAuthenticationRequest)
+    {
+        if (userAuthenticationRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(userAuthenticationRequest)); }
+        if (userAuthenticationRequest.USToken == null) { return BadRequest(AppMessages.NullParameter + nameof(userAuthenticationRequest.USToken)); }
+
+        string? response = _tokenProvider.TestToken(userAuthenticationRequest);
+
+        if (response == null) { return BadRequest(false); }
+        return Ok(response);
     }
 }
     
