@@ -1,44 +1,38 @@
-using System.Security.Principal;
 using System.Text;
 using DotNet9EFAPI.MVCS.Models._DB.Identity;
 using DotNet9EFAPI.MVCS.Services._DB;
 using DotNet9EFAPI.MVCS.Services._DB.Identity;
 using DotNet9EFAPI.MVCS.Services._DB.JWT;
 using DotNet9EFAPI.MVCS.Services.Identity;
+using DotNet9EFAPI.MVCS.Services.REST;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-// using Scalar.AspNetCore;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-string? jwtIssuer = builder.Configuration.GetSection("Jwt:Issuer").Get<string>();
-string? jwtKey = builder.Configuration.GetSection("Jwt:Secret").Get<string>();
-string? jwtAudience = builder.Configuration.GetSection("Jwt:Audience").Get<string>();
+// --- Config: JWT ---
+string? jwtIssuer = builder.Configuration["Jwt:Issuer"];
+string? jwtKey     = builder.Configuration["Jwt:Secret"];
+string? jwtAudience= builder.Configuration["Jwt:Audience"];
 
-if (jwtIssuer == null) { throw new Exception(nameof(jwtIssuer)); }
-if (jwtKey == null) { throw new Exception(nameof(jwtKey)); }
+if (string.IsNullOrWhiteSpace(jwtIssuer))  throw new Exception("Jwt:Issuer was not provided.");
+if (string.IsNullOrWhiteSpace(jwtKey))     throw new Exception("Jwt:Secret was not provided.");
+if (string.IsNullOrWhiteSpace(jwtAudience))throw new Exception("Jwt:Audience was not provided.");
 
-builder.Services.AddAuthorization();
-builder.Services.AddIdentityApiEndpoints<User>()
-    .AddEntityFrameworkStores<TestDBContext>();
-
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// --- Services ---
 builder.Services.AddControllers();
 
-// ADD DEPENDENCY INJECTIONS TO IOC
-builder.Services
-    .AddSingleton<ITokenProvider, TokenProvider>()
-    .AddScoped<IIdentityUserService, IdentityUserService>()
-    .AddScoped<IIdentityUserService, IdentityUserService>();
-
-builder.Services.AddDbContext<TestDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+// Swagger / OpenAPI
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// DbContext
+builder.Services.AddDbContext<TestDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Identity (single approach; do NOT also call AddIdentityApiEndpoints)
 builder.Services
     .AddIdentityCore<User>(options =>
     {
@@ -52,47 +46,65 @@ builder.Services
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(options => {
+// AuthN / AuthZ
+builder.Services.AddAuthentication(options =>
+{
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
+        ValidateIssuer           = true,
+        ValidateAudience         = true,
+        ValidateLifetime         = true,
         ValidateIssuerSigningKey = true,
-        ClockSkew = TimeSpan.Zero,
-        ValidIssuer = jwtIssuer,
-        ValidAudience = jwtAudience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        ClockSkew                = TimeSpan.Zero,
+        ValidIssuer              = jwtIssuer,
+        ValidAudience            = jwtAudience,
+        IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 
-WebApplication app = builder.Build();
+builder.Services.AddAuthorization();
 
-app.MapIdentityApi<User>();
+// App services (fix lifetimes + typed HttpClient)
+builder.Services
+    .AddScoped<ITokenProvider, TokenProvider>()        // was Singleton; make Scoped to avoid transient dependency issues
+    .AddScoped<IIdentityUserService, IdentityUserService>();
 
-// Middleware
-app.UseRouting();
-app.UseAuthorization();
+// Typed HttpClient for RestService
+builder.Services.AddHttpClient<IRestService, RestService>(client =>
+{
+    var baseUrl = builder.Configuration["Rest:BaseUrl"];
+    if (!string.IsNullOrWhiteSpace(baseUrl))
+    {
+        client.BaseAddress = new Uri(baseUrl);
+        // You can set default headers here if needed
+        // client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    }
+});
 
-app.MapControllers();
+var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// --- Pipeline ---
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    // app.MapScalarApiReference(); 
-
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
+app.UseAuthentication(); // IMPORTANT: enable JWT auth
+app.UseAuthorization();
+
+app.MapControllers();
+
+// If you are using Identity minimal APIs (only if you mapped endpoints for them elsewhere):
+// app.MapIdentityApi<User>();
+
 app.Run();
-
-

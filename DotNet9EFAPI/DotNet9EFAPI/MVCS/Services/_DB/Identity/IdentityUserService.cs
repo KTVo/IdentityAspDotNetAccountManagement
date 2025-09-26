@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using DotNet9EFAPI.MVCS.Models._DB.Identity;
+using DotNet9EFAPI.MVCS.Models.JWT;
 using DotNet9EFAPI.MVCS.Services._DB.Identity;
 using DotNet9EFAPI.MVCS.Services._DB.JWT;
 using DotNet9EFAPI.Statics.Messages.App;
@@ -51,7 +52,7 @@ public sealed class IdentityUserService : IIdentityUserService
     /// </summary>
     /// <param name="user"></param>
     /// <returns>A BOOLEAN ON CREATE USER STATUS</returns>
-    public async Task<string?> LogInUserAsync(string username, string password)
+    public async Task<TokenResponse?> LogInUserAsync(string username, string password)
     {
         try
         {
@@ -65,7 +66,7 @@ public sealed class IdentityUserService : IIdentityUserService
             if (valid == false) { return null; }
             
 
-            string? token = _tokenProvider.Create(user);
+            TokenResponse? token = _tokenProvider.Create(user);
             return token;
             
 
