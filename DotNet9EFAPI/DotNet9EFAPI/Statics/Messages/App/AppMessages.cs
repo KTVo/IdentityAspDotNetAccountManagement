@@ -20,12 +20,21 @@ public static class AppMessages
     #endregion
 
     #region IDENTITY_MESSAGES
-    public const string QueryAllItemsSuccess = "QUERIED ALL ITEMS WAS SUCCESSFUL.";
-    public const string QueryAllItemsFailed = "QUERYING ALL ITEMS FAILED!";
-    public const string CreatedUserSuccess = "USER WAS CREATED.";
-    public const string CreatingUserFailed = "CREATING USER FAILED!";
-    public const string LoggingInUserSuccess = "USER IS LOGGED IN.";
-    public const string LoggingInUserFailed = "CANNOT LOGIN USER!";
+        #region IDENTITY_MESSAGES_GENERAL
+        public const string QueryAllItemsSuccess = "QUERIED ALL ITEMS WAS SUCCESSFUL.";
+        public const string QueryAllItemsFailed = "QUERYING ALL ITEMS FAILED!";
+        public const string CreatedUserSuccess = "USER WAS CREATED.";
+        public const string CreatingUserFailed = "CREATING USER FAILED!";
+        public const string LoggingInUserSuccess = "USER IS LOGGED IN.";
+        public const string LoggingInUserFailed = "CANNOT LOGIN USER!";
+        #endregion
+        
+        #region IDENTITY_MESSAGES_UPDATE_USER
+        public const string FindUserFailed = "FINDING USER FAILED!";
+        public const string UpdateUserPasswordSuccess = "USER PASSWORD WAS UPDATED SUCCESSFUL.";
+        public const string UpdateUserPasswordFailed = "USER PASSWORD UPDATE FAILED!";
+        public const string CannotFindUserToUpdatePasswordFailed = "CANNOT UPDATE USER TO UPDATE PASSWORD!";
+        #endregion
 
 
     #endregion

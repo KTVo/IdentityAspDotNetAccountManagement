@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using DotNet9EFAPI.MVCS.Models._DB.Identity;
+using DotNet9EFAPI.MVCS.Models.CRUD.Identity;
 using DotNet9EFAPI.MVCS.Models.JWT;
 using DotNet9EFAPI.MVCS.Services._DB.Identity;
 using DotNet9EFAPI.MVCS.Services._DB.JWT;
@@ -78,5 +79,68 @@ public sealed class IdentityUserService : IIdentityUserService
             return null;
         }
 
+    }
+
+    public async Task<UpdateAccountDetailsResponse> UpdateUserPasswordAsync(ChangePasswordRequest changePasswordRequest)
+    {
+        try
+        {
+            if (changePasswordRequest.Email == null) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
+            if (changePasswordRequest.Username == null) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
+            if (changePasswordRequest.NewPassword == null) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
+            if (changePasswordRequest.OldPassword == null) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
+            
+            // FIND USER FROM DB
+            User? user = await _userManager.FindByNameAsync(changePasswordRequest.Email);
+            
+            if (user == null) { user = await _userManager.FindByNameAsync(changePasswordRequest.Username); }
+            
+            if (user == null) 
+                return new UpdateAccountDetailsResponse
+                {
+                    Username = null,
+                    Email = null,
+                    IsSuccessful = false,
+                    Message = AppMessages.CannotFindUserToUpdatePasswordFailed
+                    
+                }; 
+            
+            // CHANGE USER'S PASSWORD
+            IdentityResult changedUserResult = await _userManager.ChangePasswordAsync(
+                user: user,
+                currentPassword: changePasswordRequest.OldPassword,
+                newPassword: changePasswordRequest.NewPassword
+            );
+            
+            if (changedUserResult.Succeeded == false)
+            {
+                return new UpdateAccountDetailsResponse
+                {
+                    Username = changePasswordRequest.Username,
+                    Email = changePasswordRequest.Email,
+                    IsSuccessful = false,
+                    Message = AppMessages.UpdateUserPasswordFailed
+                };
+            }
+            return new UpdateAccountDetailsResponse
+            {
+                Username = user.UserName,
+                Email = user.Email,
+                IsSuccessful = true,
+                Message = AppMessages.UpdateUserPasswordSuccess
+                
+            };
+        }
+        catch (Exception ex)
+        {
+            return new UpdateAccountDetailsResponse
+            {
+                Username = changePasswordRequest.Username,
+                Email = changePasswordRequest.Email,
+                IsSuccessful = false,
+                Message = ex.Message
+                
+            };
+        }
     }
 }

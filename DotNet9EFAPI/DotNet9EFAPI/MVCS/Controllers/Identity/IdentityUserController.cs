@@ -95,7 +95,7 @@ public class IdentityUserAuthentication : ControllerBase
 
     [HttpPost]
     [Route("text/todo")]
-    public async Task<IActionResult> ToDo([FromBody] UserAuthenticationRequest userAuthenticationRequest)
+    public async Task<IActionResult> ToDo([FromBody] UserAuthenticationRequest? userAuthenticationRequest)
     {
         if (userAuthenticationRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(userAuthenticationRequest)); }
         if (userAuthenticationRequest.USToken == null) { return BadRequest(AppMessages.NullParameter + nameof(userAuthenticationRequest.USToken)); }
@@ -104,6 +104,20 @@ public class IdentityUserAuthentication : ControllerBase
 
         if (response == null) { return BadRequest(false); }
         return Ok(response);
+    }
+
+    [HttpPost]
+    [Route("update/user/password")]
+    public async Task<IActionResult> UpdateUserPassword([FromBody] ChangePasswordRequest? changePasswordRequest)
+    {
+        if (changePasswordRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(changePasswordRequest)); }
+        if (changePasswordRequest.JWTToken == null) { return BadRequest(AppMessages.NullParameter + nameof(changePasswordRequest.JWTToken)); }
+
+        UpdateAccountDetailsResponse updateAccountDetailsResponse = await _identityUserSerivce.UpdateUserPasswordAsync(changePasswordRequest);
+        
+        if (updateAccountDetailsResponse.IsSuccessful == false) { return BadRequest(updateAccountDetailsResponse); }
+        
+        return Ok(updateAccountDetailsResponse);
     }
 }
     

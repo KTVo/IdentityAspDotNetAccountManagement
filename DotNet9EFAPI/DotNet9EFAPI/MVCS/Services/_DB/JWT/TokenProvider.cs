@@ -134,4 +134,33 @@ internal sealed class TokenProvider : ITokenProvider
             return new ToDoResponse { IsSuccessful = false, Message = ex.Message }; 
         }
     }
+    
+    public async Task<ToDoResponse?> ValidateTokenAsync(UserAuthenticationRequest userAuthenticationRequest)
+    {
+
+        try
+        {
+#pragma warning disable CS8604 // Possible null reference argument.
+            TokenValidateResponse tokenValidateResponse = Helpers.Token.Verify.JwtVerification.VerifyToken(_configuration: _configuration, userAuthenticationRequest);
+#pragma warning restore CS8604 // Possible null reference argument.
+            if (tokenValidateResponse.IsSuccessful == false) { return new ToDoResponse { IsSuccessful = false, Message = tokenValidateResponse.Message }; }
+
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            ToDoResponse? restResponse = await _restService.GetDataAsync("https://jsonplaceholder.typicode.com/todos");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+            if (restResponse == null) { return new ToDoResponse { IsSuccessful = false, Message = AppMessages.NullResponse }; }
+
+            return restResponse;
+        }
+        catch (SecurityTokenValidationException ex)
+        {
+            return new ToDoResponse { IsSuccessful = false, Message = ex.Message }; 
+        }
+        catch (Exception ex)
+        {
+            return new ToDoResponse { IsSuccessful = false, Message = ex.Message }; 
+        }
+    }
 }

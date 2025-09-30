@@ -10,4 +10,5 @@ public interface IIdentityUserService
 {
     Task<bool> CreateUserAsync(User user);
     Task<TokenResponse?> LogInUserAsync(string username, string password);
+    Task<UpdateAccountDetailsResponse> UpdateUserPasswordAsync(ChangePasswordRequest changePasswordRequest);
 }
