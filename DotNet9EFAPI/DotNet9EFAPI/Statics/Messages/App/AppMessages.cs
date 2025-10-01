@@ -31,9 +31,18 @@ public static class AppMessages
         
         #region IDENTITY_MESSAGES_UPDATE_USER
         public const string FindUserFailed = "FINDING USER FAILED!";
+        public const string EmailChangeFailed = "EMAIL CHANGE FAILED!";
+        public const string PhoneNumberChangeFailed = "PHONE NUMBER CHANGE FAILED!";
+        public const string EmailChangeSuccess = "EMAIL CHANGE SUCCESSFUL!";
+        public const string PhoneNumberChangeSuccess= "PHONE NUMBER CHANGED SUCCESSFULLY!";
         public const string UpdateUserPasswordSuccess = "USER PASSWORD WAS UPDATED SUCCESSFUL.";
         public const string UpdateUserPasswordFailed = "USER PASSWORD UPDATE FAILED!";
-        public const string CannotFindUserToUpdatePasswordFailed = "CANNOT UPDATE USER TO UPDATE PASSWORD!";
+        public const string GenerateTokenToChangeEmailFailed = "CANNOT GENERATE TOKEN TO CHANGE EMAIL!";
+        public const string GenerateTokenToChangePhoneFailed = "CANNOT GENERATE TOKEN TO CHANGE PHONE!";
+        public const string CannotFindUserToUpdatePasswordFailed = "CANNOT FIND USER TO UPDATE PASSWORD!";
+        public const string CannotFindUserToUpdateEmailFailed = "CANNOT FIND USER TO UPDATE EMAIL!";
+        
+
         #endregion
 
 

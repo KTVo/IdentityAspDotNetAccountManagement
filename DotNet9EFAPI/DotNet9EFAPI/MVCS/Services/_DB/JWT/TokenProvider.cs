@@ -10,6 +10,7 @@ using DotNet9EFAPI.Statics.Messages.App;
 using DotNet9EFAPI.MVCS.Models.DummyData;
 using DotNet9EFAPI.MVCS.Services.REST;
 using System.Threading.Tasks;
+using DotNet9EFAPI.Helpers.Token.Verify;
 
 namespace DotNet9EFAPI.MVCS.Services._DB.JWT;
 
@@ -32,6 +33,7 @@ internal sealed class TokenProvider : ITokenProvider
         {
             if (user == null) { return new TokenResponse { Token = null, IsSuccessful = false, Message = AppMessages.NullModel }; }
             if (user.Email == null) { return new TokenResponse { Token = null, IsSuccessful = false, Message = AppMessages.NullParameter }; }
+            if (user.UserName == null) { return new TokenResponse { Token = null, IsSuccessful = false, Message = AppMessages.NullParameter }; }
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             string secretKey = _configuration["Jwt:Secret"]!;
@@ -43,7 +45,8 @@ internal sealed class TokenProvider : ITokenProvider
 
             Claim[] claims = new[]
             {
-                new Claim("UserEmail", user.Email)
+                new Claim("UserEmail", user.Email),
+                new Claim("UserName", user.UserName),
             };
 
             JwtSecurityToken Sectoken = new JwtSecurityToken(
@@ -64,46 +67,15 @@ internal sealed class TokenProvider : ITokenProvider
 
     }
 
-    public string? TestToken(UserAuthenticationRequest userAuthenticationRequest)
+    public TokenValidateResponse ValidateToken(UserAuthenticationRequest userAuthenticationRequest)
     {
-        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-        try
-        {
-            TokenValidationParameters validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                ValidIssuer = _configuration["Jwt:Issuer"],
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                ValidateAudience = true,
-                ValidAudience = _configuration["Jwt:Audience"],
-                ValidateIssuerSigningKey = true,
-#pragma warning disable CS8604 // Dereference of a possibly null reference.
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"])),
-#pragma warning restore CS8604 // Dereference of a possibly null reference.
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            };
-
-            SecurityToken validatedToken;
-            ClaimsPrincipal principal = tokenHandler.ValidateToken(userAuthenticationRequest.USToken, validationParameters, out validatedToken);
-
-            string? userEmail = principal.FindFirst("UserEmail")?.Value;
-
-            if (userEmail == null) { return null; }
-
-            return userEmail;
-        }
-        catch (SecurityTokenValidationException ex)
-        {
-            Debug.WriteLine($"Token validation failed: {ex.Message}");
-            return null;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"An error occurred: {ex.Message}");
-            return null;
-        }
+#pragma warning disable CS8604 // Possible null reference argument.
+        TokenValidateResponse tokenIsValidResponse = JwtVerification.VerifyToken(
+            configuration: _configuration,
+            userAuthenticationRequest: userAuthenticationRequest);
+#pragma warning restore CS8604 // Possible null reference argument.
+        
+        return tokenIsValidResponse;
     }
     
     public async Task<ToDoResponse?> AuthorizationTestAsync(UserAuthenticationRequest userAuthenticationRequest)
@@ -112,36 +84,7 @@ internal sealed class TokenProvider : ITokenProvider
         try
         {
 #pragma warning disable CS8604 // Possible null reference argument.
-            TokenValidateResponse tokenValidateResponse = Helpers.Token.Verify.JwtVerification.VerifyToken(_configuration: _configuration, userAuthenticationRequest);
-#pragma warning restore CS8604 // Possible null reference argument.
-            if (tokenValidateResponse.IsSuccessful == false) { return new ToDoResponse { IsSuccessful = false, Message = tokenValidateResponse.Message }; }
-
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            ToDoResponse? restResponse = await _restService.GetDataAsync("https://jsonplaceholder.typicode.com/todos");
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-            if (restResponse == null) { return new ToDoResponse { IsSuccessful = false, Message = AppMessages.NullResponse }; }
-
-            return restResponse;
-        }
-        catch (SecurityTokenValidationException ex)
-        {
-            return new ToDoResponse { IsSuccessful = false, Message = ex.Message }; 
-        }
-        catch (Exception ex)
-        {
-            return new ToDoResponse { IsSuccessful = false, Message = ex.Message }; 
-        }
-    }
-    
-    public async Task<ToDoResponse?> ValidateTokenAsync(UserAuthenticationRequest userAuthenticationRequest)
-    {
-
-        try
-        {
-#pragma warning disable CS8604 // Possible null reference argument.
-            TokenValidateResponse tokenValidateResponse = Helpers.Token.Verify.JwtVerification.VerifyToken(_configuration: _configuration, userAuthenticationRequest);
+            TokenValidateResponse tokenValidateResponse = Helpers.Token.Verify.JwtVerification.VerifyToken(configuration: _configuration, userAuthenticationRequest);
 #pragma warning restore CS8604 // Possible null reference argument.
             if (tokenValidateResponse.IsSuccessful == false) { return new ToDoResponse { IsSuccessful = false, Message = tokenValidateResponse.Message }; }
 

@@ -9,7 +9,7 @@ namespace DotNet9EFAPI.MVCS.Services._DB.JWT;
 public interface ITokenProvider
 {
     TokenResponse? Create(User user);
-    string? TestToken(UserAuthenticationRequest userAuthenticationRequest);
+    TokenValidateResponse ValidateToken(UserAuthenticationRequest userAuthenticationRequest);
     Task<ToDoResponse?> AuthorizationTestAsync(UserAuthenticationRequest userAuthenticationRequest);
 
 }

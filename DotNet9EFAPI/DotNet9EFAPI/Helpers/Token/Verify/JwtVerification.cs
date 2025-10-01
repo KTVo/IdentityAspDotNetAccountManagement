@@ -9,7 +9,7 @@ namespace DotNet9EFAPI.Helpers.Token.Verify;
 
 public static class JwtVerification
 {
-    public static TokenValidateResponse VerifyToken(IConfiguration _configuration, UserAuthenticationRequest userAuthenticationRequest)
+    public static TokenValidateResponse VerifyToken(IConfiguration configuration, UserAuthenticationRequest userAuthenticationRequest)
     {
         JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
@@ -17,13 +17,13 @@ public static class JwtVerification
         {
             ValidateIssuer = true,
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            ValidIssuer = _configuration["Jwt:Issuer"],
+            ValidIssuer = configuration["Jwt:Issuer"],
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             ValidateAudience = true,
-            ValidAudience = _configuration["Jwt:Audience"],
+            ValidAudience = configuration["Jwt:Audience"],
             ValidateIssuerSigningKey = true,
 #pragma warning disable CS8604 // Dereference of a possibly null reference.
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"])),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["Jwt:Secret"])),
 #pragma warning restore CS8604 // Dereference of a possibly null reference.
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
@@ -34,16 +34,23 @@ public static class JwtVerification
         try
         {
             ClaimsPrincipal principal = tokenHandler.ValidateToken(
-                userAuthenticationRequest.USToken,
+                userAuthenticationRequest.JWTToken,
                 validationParameters,
                 out validatedToken
             );
+            
+            string? userEmail = principal.FindFirst("UserEmail")?.Value;
+            string? userName = principal.FindFirst("UserName")?.Value;
+            
+            if (userEmail == null) { return new TokenValidateResponse { IsSuccessful = false }; }
             
             return new TokenValidateResponse
             {
                 IsSuccessful = true,
                 ValidatedToken = validatedToken,
                 ClaimsPrincipal = principal,
+                RetrievedEmail = userEmail,
+                RetrievedUsername = userName,
                 Message = "TOKEN VALIDATED SUCCESSFULLY."
              };
         }

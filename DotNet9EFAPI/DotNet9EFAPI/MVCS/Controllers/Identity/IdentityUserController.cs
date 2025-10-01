@@ -82,14 +82,13 @@ public class IdentityUserAuthentication : ControllerBase
 
     [HttpPost]
     [Route("test/token")]
-    public IActionResult TestToken([FromBody] UserAuthenticationRequest userAuthenticationRequest)
+    public IActionResult TestToken([FromBody] UserAuthenticationRequest? userAuthenticationRequest)
     {
         if (userAuthenticationRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(userAuthenticationRequest)); }
         if (userAuthenticationRequest.USToken == null) { return BadRequest(AppMessages.NullParameter + nameof(userAuthenticationRequest.USToken)); }
 
-        string? response = _tokenProvider.TestToken(userAuthenticationRequest);
-
-        if (response == null) { return BadRequest(false); }
+        TokenValidateResponse response = _tokenProvider.ValidateToken(userAuthenticationRequest);
+        
         return Ok(response);
     }
 
@@ -114,6 +113,34 @@ public class IdentityUserAuthentication : ControllerBase
         if (changePasswordRequest.JWTToken == null) { return BadRequest(AppMessages.NullParameter + nameof(changePasswordRequest.JWTToken)); }
 
         UpdateAccountDetailsResponse updateAccountDetailsResponse = await _identityUserSerivce.UpdateUserPasswordAsync(changePasswordRequest);
+        
+        if (updateAccountDetailsResponse.IsSuccessful == false) { return BadRequest(updateAccountDetailsResponse); }
+        
+        return Ok(updateAccountDetailsResponse);
+    }
+    
+    [HttpPost]
+    [Route("update/user/email")]
+    public async Task<IActionResult> UpdateUserEmail([FromBody] ChangeEmailRequest? changeEmailRequest)
+    {
+        if (changeEmailRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(changeEmailRequest)); }
+        if (changeEmailRequest.JWTToken == null) { return BadRequest(AppMessages.NullParameter + nameof(changeEmailRequest.JWTToken)); }
+
+        UpdateAccountDetailsResponse updateAccountDetailsResponse = await _identityUserSerivce.UpdateUserEmailAsync(changeEmailRequest);
+        
+        if (updateAccountDetailsResponse.IsSuccessful == false) { return BadRequest(updateAccountDetailsResponse); }
+        
+        return Ok(updateAccountDetailsResponse);
+    }
+    
+    [HttpPost]
+    [Route("update/user/phone/number")]
+    public async Task<IActionResult> UpdateUserPhoneNumber([FromBody] ChangePhoneNumberRequest? changePhoneNumberRequest)
+    {
+        if (changePhoneNumberRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(changePhoneNumberRequest)); }
+        if (changePhoneNumberRequest.JWTToken == null) { return BadRequest(AppMessages.NullParameter + nameof(changePhoneNumberRequest.JWTToken)); }
+
+        UpdateAccountDetailsResponse updateAccountDetailsResponse = await _identityUserSerivce.UpdatePhoneNumberAsync(changePhoneNumberRequest);
         
         if (updateAccountDetailsResponse.IsSuccessful == false) { return BadRequest(updateAccountDetailsResponse); }
         
