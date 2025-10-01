@@ -146,6 +146,20 @@ public class IdentityUserAuthentication : ControllerBase
         
         return Ok(updateAccountDetailsResponse);
     }
+    
+    [HttpPost]
+    [Route("update/user/details")]
+    public async Task<IActionResult> UpdateUserDetail([FromBody] ChangeUserRequest? changeUserRequest)
+    {
+        if (changeUserRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(changeUserRequest)); }
+        if (changeUserRequest.JWTToken == null) { return BadRequest(AppMessages.NullParameter + nameof(changeUserRequest.JWTToken)); }
+
+        UpdateAccountDetailsResponse updateAccountDetailsResponse = await _identityUserSerivce.UpdateUserAsync(changeUserRequest);
+        
+        if (updateAccountDetailsResponse.IsSuccessful == false) { return BadRequest(updateAccountDetailsResponse); }
+        
+        return Ok(updateAccountDetailsResponse);
+    }
 }
     
 

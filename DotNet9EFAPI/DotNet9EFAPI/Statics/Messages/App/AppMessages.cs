@@ -35,6 +35,8 @@ public static class AppMessages
         public const string PhoneNumberChangeFailed = "PHONE NUMBER CHANGE FAILED!";
         public const string EmailChangeSuccess = "EMAIL CHANGE SUCCESSFUL!";
         public const string PhoneNumberChangeSuccess= "PHONE NUMBER CHANGED SUCCESSFULLY!";
+        public const string UserChangeSuccess = "USER CHANGE SUCCESSFUL!";
+        public const string UserChangeFailed = "USER CHANGE FAILED!";
         public const string UpdateUserPasswordSuccess = "USER PASSWORD WAS UPDATED SUCCESSFUL.";
         public const string UpdateUserPasswordFailed = "USER PASSWORD UPDATE FAILED!";
         public const string GenerateTokenToChangeEmailFailed = "CANNOT GENERATE TOKEN TO CHANGE EMAIL!";

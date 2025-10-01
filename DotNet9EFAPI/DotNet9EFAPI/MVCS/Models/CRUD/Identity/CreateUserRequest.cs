@@ -1,8 +1,6 @@
-using DotNet9EFAPI.MVCS.Models._base;
-
 namespace DotNet9EFAPI.MVCS.Models.CRUD.Identity;
 
-public class CreateUserRequest : BaseRequest
+public class CreateUserRequest
 {
     public string? Email { get; set; }
     public string? Password { get; set; }

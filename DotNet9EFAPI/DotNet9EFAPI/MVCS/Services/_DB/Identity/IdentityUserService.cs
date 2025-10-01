@@ -91,7 +91,7 @@ public sealed class IdentityUserService : IIdentityUserService
             if (changePasswordRequest.JWTToken == null) { new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
             if (changePasswordRequest.NewPassword == null) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
             if (changePasswordRequest.OldPassword == null) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
-    
+  
             TokenValidateResponse tokenValidateResponse = _tokenProvider.ValidateToken(new UserAuthenticationRequest()
             {
                 JWTToken = changePasswordRequest.JWTToken
@@ -101,6 +101,7 @@ public sealed class IdentityUserService : IIdentityUserService
             if (tokenValidateResponse.IsSuccessful == false) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = tokenValidateResponse.Message}; }
             if (String.IsNullOrEmpty(tokenValidateResponse.RetrievedEmail)) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
             if (String.IsNullOrEmpty(tokenValidateResponse.RetrievedUsername)) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
+
             
             // FIND USER FROM DB
             User? user = await _userManager.FindByNameAsync(tokenValidateResponse.RetrievedEmail);
@@ -115,7 +116,7 @@ public sealed class IdentityUserService : IIdentityUserService
                     IsSuccessful = false,
                     Message = AppMessages.CannotFindUserToUpdatePasswordFailed
                     
-                }; 
+                };
             
             // CHANGE USER'S PASSWORD
             IdentityResult? changedUserResult = await _userManager.ChangePasswordAsync(
@@ -233,6 +234,50 @@ public sealed class IdentityUserService : IIdentityUserService
             if (response.Succeeded == false) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.PhoneNumberChangeFailed }; }
             
             return new UpdateAccountDetailsResponse {IsSuccessful = true, Message = AppMessages.PhoneNumberChangeSuccess }; 
+        }
+        catch (Exception ex)
+        {
+            return new UpdateAccountDetailsResponse {IsSuccessful = true, Message = ex.Message }; 
+        }
+        
+    }
+    
+    /// <summary>
+    /// UPDATES THE USER'S ON THE DATABASE
+    /// </summary>
+    /// <param name="model"></param>
+    /// <returns></returns>
+    public async Task<UpdateAccountDetailsResponse> UpdateUserAsync(ChangeUserRequest model)
+    {
+        try
+        {
+            // NULL CHECKS
+            if (string.IsNullOrEmpty(model.NewUserName)) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
+
+            // VALIDATES IF GIVEN JWT IS ACTIVE
+            TokenValidateResponse tokenValidateResponse = _tokenProvider.ValidateToken(new UserAuthenticationRequest()
+            {
+                JWTToken = model.JWTToken
+            });
+            
+            // SEARCHES USER ON DATABASE
+            if (tokenValidateResponse.IsSuccessful == false) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = tokenValidateResponse.Message}; }
+            if (string.IsNullOrEmpty(tokenValidateResponse.RetrievedEmail)) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
+            if (string.IsNullOrEmpty(tokenValidateResponse.RetrievedUsername)) { return new UpdateAccountDetailsResponse {IsSuccessful = false, Message = AppMessages.NullParameter}; }
+
+            User? user = await _userManager.FindByNameAsync(tokenValidateResponse.RetrievedEmail);
+            
+            if (user == null) { user = await _userManager.FindByNameAsync(tokenValidateResponse.RetrievedUsername); }
+            
+            if (user == null) { return new UpdateAccountDetailsResponse() { IsSuccessful = false,  Message = AppMessages.CannotFindUserToUpdateEmailFailed }; }
+            
+            if (model.UpdateUserName == true) { user.UserName = model.NewUserName; }
+            
+            IdentityResult response = await _userManager.UpdateAsync(user: user);
+            
+            if (response.Succeeded == false) { return new UpdateAccountDetailsResponse { IsSuccessful = false, Message = AppMessages.UserChangeFailed }; }
+            
+            return new UpdateAccountDetailsResponse {IsSuccessful = true, Message = AppMessages.UserChangeSuccess }; 
         }
         catch (Exception ex)
         {

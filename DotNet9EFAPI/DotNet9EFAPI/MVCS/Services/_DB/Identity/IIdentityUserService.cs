@@ -11,4 +11,5 @@ public interface IIdentityUserService
     Task<UpdateAccountDetailsResponse> UpdateUserEmailAsync(ChangeEmailRequest changeEmailRequest);
     Task<UpdateAccountDetailsResponse> UpdatePhoneNumberAsync(ChangePhoneNumberRequest changePhoneRequest);
     Task<UpdateAccountDetailsResponse> UpdateUserPasswordAsync(ChangePasswordRequest changePasswordRequest);
+    Task<UpdateAccountDetailsResponse> UpdateUserAsync(ChangeUserRequest model);
 }
