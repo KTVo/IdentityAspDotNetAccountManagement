@@ -1,14 +1,21 @@
-using DotNet9EFAPI.MVCS.Models.DB;
+using DotNet9EFAPI.MVCS.Models._DB.Identity;
+using DotNet9EFAPI.MVCS.Models._DB.Sessions.Get;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNet9EFAPI.MVCS.Services._DB;
 
-public class TestDBContext : DbContext
+public class TestDBContext : IdentityDbContext<User, IdentityRole, string>
 {
-
+    public DbSet<Session>? Sessions { get; init; }
     public TestDBContext(DbContextOptions<TestDBContext> options) : base(options) { }
-   
-    // INSTANTIATE C# MODELS FOR THE DATABASE(S)
-    public DbSet<Item>? Items { get; set; }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder); // IMPORTANT: configures all Identity tables
+        modelBuilder.Entity<User>();
+        modelBuilder.Entity<Session>();
+        
+    }
 }

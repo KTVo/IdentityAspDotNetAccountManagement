@@ -1,11 +1,47 @@
 @DotNet9EFAPI_HostAddress = http://localhost:5048
 
-GET {{DotNet9EFAPI_HostAddress}}/weatherforecast/
+###
+POST {{DotNet9EFAPI_HostAddress}}/api/v1/user/register
+Content-Type: application/json
 Accept: application/json
 
-###
+{
+    "userName": "kevin4.vo",
+    "email": "kevin.vo4@example.com",
+    "password": "Str0ngP@ssword1231!",
+    "firstName": "Kevin",
+    "lastName": "Vo",
+    "phoneNumber": "555-123-4567"
+}
 
-POST {{DotNet9EFAPI_HostAddress}}/api/v1/test/get/all/items
+###
+POST {{DotNet9EFAPI_HostAddress}}/api/v1/user/login
+Content-Type: application/json
 Accept: application/json
 
+{
+    "username": "foolycooly288622@yahoo.com",
+    "password": "Str0ngP@ssword1231!"
+}
+
 ###
+POST {{DotNet9EFAPI_HostAddress}}/register
+Content-Type: application/json
+Accept: application/json
+
+{
+    "username": "kevin4.vo",
+    "email": "foolycooly288622@yahoo.com",
+    "password": "Str0ngP@ssword1231!"
+}
+
+###
+POST {{DotNet9EFAPI_HostAddress}}/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "username": "kevin4.vo",
+    "email": "foolycooly288622@yahoo.com",
+    "password": "Str0ngP@ssword1231!"
+}
