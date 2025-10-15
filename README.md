@@ -1,13 +1,7 @@
-# Identity ASP.Net Account Management
-
 <!-- PROJECT SHIELDS -->
 [![Version][version-shield]]
 
-<!-- PAGE TITLE -->
-<div>
-  <!-- COMPANY LOGO -->
-  <h1  align="center">ASP.NET Web API (.NET 9) with Entity Framework Integration</h1>
-</div>
+# Identity ASP.Net Account Management
 
 <!-- DESCRIPTION -->
 > This project is a lightweight and extensible ASP.NET Core Web API built with .NET 9, designed to perform full CRUD (Create, Read, Update, Delete) operations against any database supported by Entity Framework Core.
