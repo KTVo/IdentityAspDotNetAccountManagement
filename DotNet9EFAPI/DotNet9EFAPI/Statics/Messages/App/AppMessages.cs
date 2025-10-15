@@ -14,6 +14,15 @@ public static class AppMessages
     public const string responseSuccessful = "RESPONSE SUCCESSFULLY RETRIEVED!";
     #endregion
 
+    #region EMAIL_MESSAGES
+    public const string EmailSuccess = "EMAIL SENT SUCCESSFULLY.";
+    
+    public const string NullEmail = "EMAIL IS NULL!";
+    public const string NullEmailAddress = "EMAIL ADDRESS IS NULL: ";
+    public const string NullEmailSubject = "I AM SUBJECT.";
+    public const string EmailBody = "THANK YOU. I AM BODY.";
+    #endregion
+
     #region TOKEN_MESSAGES
     public const string CreatedTokenSuccess = "TOKEN WAS CREATED SUCCESSFULLY.";
     public const string CreatedTokenFailed = "TOKEN WAS NOT CREATED!";
@@ -34,7 +43,7 @@ public static class AppMessages
         public const string EmailChangeFailed = "EMAIL CHANGE FAILED!";
         public const string PhoneNumberChangeFailed = "PHONE NUMBER CHANGE FAILED!";
         public const string EmailChangeSuccess = "EMAIL CHANGE SUCCESSFUL!";
-        public const string PhoneNumberChangeSuccess= "PHONE NUMBER CHANGED SUCCESSFULLY!";
+        public const string PhoneNumberChangeSuccess= "PHONE NUMBER CHANGED SUCCESSFULLY.";
         public const string UserChangeSuccess = "USER CHANGE SUCCESSFUL!";
         public const string UserChangeFailed = "USER CHANGE FAILED!";
         public const string UpdateUserPasswordSuccess = "USER PASSWORD WAS UPDATED SUCCESSFUL.";
@@ -42,8 +51,10 @@ public static class AppMessages
         public const string GenerateTokenToChangeEmailFailed = "CANNOT GENERATE TOKEN TO CHANGE EMAIL!";
         public const string GenerateTokenToChangePhoneFailed = "CANNOT GENERATE TOKEN TO CHANGE PHONE!";
         public const string CannotFindUserToUpdatePasswordFailed = "CANNOT FIND USER TO UPDATE PASSWORD!";
+        public const string CannotFindUserToResetPasswordFailed = "CANNOT FIND USER TO RESET PASSWORD!";
         public const string CannotFindUserToUpdateEmailFailed = "CANNOT FIND USER TO UPDATE EMAIL!";
-        
+        public const string GeneratePasswordResetTokenSuccess = "PASSWORD RESET TOKEN GENERATED SUCCESSFULLY.";
+        public const string GeneratePasswordResetTokenFailed = "PASSWORD RESET TOKEN GENERATED FAILED!";
 
         #endregion
 

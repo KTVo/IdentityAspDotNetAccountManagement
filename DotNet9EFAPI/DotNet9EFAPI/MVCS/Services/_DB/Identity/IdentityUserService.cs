@@ -285,4 +285,33 @@ public sealed class IdentityUserService : IIdentityUserService
         }
         
     }
+
+    public async Task<InitiatePasswordResetResponse> RequestPasswordReset(InitiatePasswordResetRequest model)
+    {
+        if (model.JWTToken == null) { return new InitiatePasswordResetResponse { IsSuccessful = false, Message = AppMessages.NullParameter }; }
+        
+        // VALIDATES IF GIVEN JWT IS ACTIVE
+        TokenValidateResponse tokenValidateResponse = _tokenProvider.ValidateToken(new UserAuthenticationRequest()
+        {
+            JWTToken = model.JWTToken
+        });
+
+        string? usernameEmail = null;
+        
+        if (string.IsNullOrEmpty(tokenValidateResponse.RetrievedEmail) == false) { usernameEmail =  tokenValidateResponse.RetrievedEmail; }
+        else if (string.IsNullOrEmpty(tokenValidateResponse.RetrievedUsername) == false) { usernameEmail = tokenValidateResponse.RetrievedUsername; }
+
+        if (string.IsNullOrEmpty(usernameEmail) == true) { return new InitiatePasswordResetResponse { IsSuccessful = false, Message = AppMessages.NullParameter }; }
+
+        User? user = await _userManager.FindByNameAsync(usernameEmail);
+        
+        if (user == null) { user = await _userManager.FindByEmailAsync(usernameEmail); }
+        if (user == null) { return new InitiatePasswordResetResponse { IsSuccessful = false, Message = AppMessages.CannotFindUserToResetPasswordFailed }; }
+
+        string? passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user: user);
+        
+        if (string.IsNullOrEmpty(passwordResetToken) ==  true) { return new InitiatePasswordResetResponse { IsSuccessful = false, Message = AppMessages.GeneratePasswordResetTokenFailed }; }
+
+        return new InitiatePasswordResetResponse { IsSuccessful = true, Message = AppMessages.GeneratePasswordResetTokenSuccess, PasswordResetToken = passwordResetToken };
+    }
 }
