@@ -1,4 +1,4 @@
-# SQL-.Net-API
+# Identity ASP.Net Account Management
 
 <!-- PROJECT SHIELDS -->
 [![Version][version-shield]]
@@ -29,7 +29,7 @@ Scalable and maintainable architecture that can be easily extended with addition
 ```
 + SCMs: GitHub Desktop
 + Programing Languages: C#
-+ Frameworks: Playwright
++ Frameworks: ASP.NET Core Identity
 + IDEs: Visual Studios Code
 ```
 ## Nugets
