@@ -17,10 +17,17 @@ public class IdentityUserAuthentication : ControllerBase
     private readonly IIdentityUserService _identityUserSerivce;
     private readonly ITokenProvider _tokenProvider;
     private readonly ISmtpEmailService _emailSender;
+    private readonly ISendGridService _sendGridService;
 
 
-    public IdentityUserAuthentication(ISmtpEmailService emailSender, IIdentityUserService identityUserService, ITokenProvider tokenProvider, IConfiguration configuration)
+    public IdentityUserAuthentication(
+        ISendGridService sendGridService,
+        ISmtpEmailService emailSender, 
+        IIdentityUserService identityUserService, 
+        ITokenProvider tokenProvider, 
+        IConfiguration configuration)
     {
+        _sendGridService =  sendGridService ?? throw new ArgumentNullException(nameof(sendGridService));
         _identityUserSerivce = identityUserService ?? throw new ArgumentNullException(nameof(identityUserService));
         _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
         _emailSender = emailSender  ?? throw new ArgumentNullException(nameof(emailSender));
@@ -185,6 +192,26 @@ public class IdentityUserAuthentication : ControllerBase
     public async Task<IActionResult> TestSendEmail(SendEmailRequest model)
     {
         SendEmailResponse initialResetPasswordResponse = await _emailSender.SendEmailAsync(model);
+        
+        if (initialResetPasswordResponse.IsSuccessful == false) { return BadRequest(initialResetPasswordResponse); }
+        
+        return Ok(initialResetPasswordResponse);
+    }
+    
+    [HttpPost]
+    [Route("test/send/grid/send/email")]
+    public async Task<IActionResult> TestSendGridEmail(SendEmailRequest model)
+    {
+        if (model == null) { return BadRequest(AppMessages.NullParameter + nameof(model)); }
+        if (string.IsNullOrEmpty(model.ToEmail)) { return BadRequest(AppMessages.NullParameter + nameof(model)); }
+        if (string.IsNullOrEmpty(model.Subject)) { return BadRequest(AppMessages.NullParameter + nameof(model.Subject)); }
+        if (string.IsNullOrEmpty(model.Body)) { return BadRequest(AppMessages.NullParameter + nameof(model.Body)); }
+        
+        SendEmailResponse initialResetPasswordResponse = await _sendGridService.SendEmailAsync(
+            toEmail: model.ToEmail, 
+            subject: model.Subject, 
+            message: model.Body
+            );
         
         if (initialResetPasswordResponse.IsSuccessful == false) { return BadRequest(initialResetPasswordResponse); }
         

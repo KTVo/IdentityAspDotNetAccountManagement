@@ -78,6 +78,7 @@ builder.Services.Configure<EmailSettings>(
 builder.Services
     .AddScoped<ITokenProvider, TokenProvider>()        // was Singleton; make Scoped to avoid transient dependency issues
     .AddScoped<IIdentityUserService, IdentityUserService>()
+    .AddScoped<ISendGridService, SendGridService>()
     .AddScoped<ISmtpEmailService, SmtpEmailService>();
 
 // Typed HttpClient for RestService
