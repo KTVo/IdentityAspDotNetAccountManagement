@@ -1,9 +1,11 @@
 using DotNet9EFAPI.MVCS.Models._DB.Identity;
 using DotNet9EFAPI.MVCS.Models.CRUD.Identity;
 using DotNet9EFAPI.MVCS.Models.DummyData;
+using DotNet9EFAPI.MVCS.Models.Email;
 using DotNet9EFAPI.MVCS.Models.JWT;
 using DotNet9EFAPI.MVCS.Services._DB.Identity;
 using DotNet9EFAPI.MVCS.Services._DB.JWT;
+using DotNet9EFAPI.MVCS.Services.Email;
 using DotNet9EFAPI.Statics.Messages.App;
 using Microsoft.AspNetCore.Mvc;
 namespace DotNet9EFAPI.MVCS.Controllers;
@@ -13,13 +15,15 @@ namespace DotNet9EFAPI.MVCS.Controllers;
 public class IdentityUserAuthentication : ControllerBase
 {
     private readonly IIdentityUserService _identityUserSerivce;
-    public readonly ITokenProvider _tokenProvider;
+    private readonly ITokenProvider _tokenProvider;
+    private readonly ISmtpEmailService _emailSender;
 
 
-    public IdentityUserAuthentication(IIdentityUserService identityUserService, ITokenProvider tokenProvider, IConfiguration configuration)
+    public IdentityUserAuthentication(ISmtpEmailService emailSender, IIdentityUserService identityUserService, ITokenProvider tokenProvider, IConfiguration configuration)
     {
         _identityUserSerivce = identityUserService ?? throw new ArgumentNullException(nameof(identityUserService));
         _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+        _emailSender = emailSender  ?? throw new ArgumentNullException(nameof(emailSender));
     }
 
     [HttpPost]
@@ -151,6 +155,7 @@ public class IdentityUserAuthentication : ControllerBase
     [Route("update/user/details")]
     public async Task<IActionResult> UpdateUserDetail([FromBody] ChangeUserRequest? changeUserRequest)
     {
+        // NULL CHECKS - WILL CHECK FOR OTHER FIELDS IN THE SERVICE
         if (changeUserRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(changeUserRequest)); }
         if (changeUserRequest.JWTToken == null) { return BadRequest(AppMessages.NullParameter + nameof(changeUserRequest.JWTToken)); }
 
@@ -159,6 +164,31 @@ public class IdentityUserAuthentication : ControllerBase
         if (updateAccountDetailsResponse.IsSuccessful == false) { return BadRequest(updateAccountDetailsResponse); }
         
         return Ok(updateAccountDetailsResponse);
+    }
+    
+    [HttpPost]
+    [Route("reset/password")]
+    public async Task<IActionResult> ResetPassword([FromBody] InitiatePasswordResetRequest? initiatePasswordResetRequest)
+    {
+        if (initiatePasswordResetRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(initiatePasswordResetRequest)); }
+        if (initiatePasswordResetRequest.JWTToken == null) { return BadRequest(AppMessages.NullParameter + nameof(initiatePasswordResetRequest.JWTToken)); }
+
+        InitiatePasswordResetResponse initialResetPasswordResponse = await _identityUserSerivce.RequestPasswordReset(initiatePasswordResetRequest);
+        
+        if (initialResetPasswordResponse.IsSuccessful == false) { return BadRequest(initialResetPasswordResponse); }
+        
+        return Ok(initialResetPasswordResponse);
+    }
+    
+    [HttpPost]
+    [Route("test/send/email")]
+    public async Task<IActionResult> TestSendEmail(SendEmailRequest model)
+    {
+        SendEmailResponse initialResetPasswordResponse = await _emailSender.SendEmailAsync(model);
+        
+        if (initialResetPasswordResponse.IsSuccessful == false) { return BadRequest(initialResetPasswordResponse); }
+        
+        return Ok(initialResetPasswordResponse);
     }
 }
     

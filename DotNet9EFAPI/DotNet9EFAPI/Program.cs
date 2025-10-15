@@ -1,8 +1,10 @@
 using System.Text;
 using DotNet9EFAPI.MVCS.Models._DB.Identity;
+using DotNet9EFAPI.MVCS.Models.Email;
 using DotNet9EFAPI.MVCS.Services._DB;
 using DotNet9EFAPI.MVCS.Services._DB.Identity;
 using DotNet9EFAPI.MVCS.Services._DB.JWT;
+using DotNet9EFAPI.MVCS.Services.Email;
 using DotNet9EFAPI.MVCS.Services.Identity;
 using DotNet9EFAPI.MVCS.Services.REST;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -69,10 +71,14 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("Email"));
+
 // App services (fix lifetimes + typed HttpClient)
 builder.Services
     .AddScoped<ITokenProvider, TokenProvider>()        // was Singleton; make Scoped to avoid transient dependency issues
-    .AddScoped<IIdentityUserService, IdentityUserService>();
+    .AddScoped<IIdentityUserService, IdentityUserService>()
+    .AddScoped<ISmtpEmailService, SmtpEmailService>();
 
 // Typed HttpClient for RestService
 builder.Services.AddHttpClient<IRestService, RestService>(client =>
