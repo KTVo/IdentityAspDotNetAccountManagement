@@ -1,15 +1,13 @@
 using System.Security.Claims;
 using System.Text;
-using DotNet9EFAPI.MVCS.Models._DB.Identity;
+using DotNet9EFAPI.MVCS.Models._DB.AccountManagement;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Diagnostics;
-using DotNet9EFAPI.MVCS.Models.CRUD.Identity;
+using DotNet9EFAPI.MVCS.Models.CRUD.AccountManagement;
 using DotNet9EFAPI.MVCS.Models.JWT;
 using DotNet9EFAPI.Statics.Messages.App;
 using DotNet9EFAPI.MVCS.Models.DummyData;
 using DotNet9EFAPI.MVCS.Services.REST;
-using System.Threading.Tasks;
 using DotNet9EFAPI.Helpers.Token.Verify;
 
 namespace DotNet9EFAPI.MVCS.Services._DB.JWT;

@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using DotNet9EFAPI.MVCS.Models._DB.Identity;
-using DotNet9EFAPI.MVCS.Models.CRUD.Identity;
+using DotNet9EFAPI.MVCS.Models._DB.AccountManagement;
+using DotNet9EFAPI.MVCS.Models.CRUD.AccountManagement;
 using DotNet9EFAPI.MVCS.Models.DummyData;
 using DotNet9EFAPI.MVCS.Models.JWT;
 

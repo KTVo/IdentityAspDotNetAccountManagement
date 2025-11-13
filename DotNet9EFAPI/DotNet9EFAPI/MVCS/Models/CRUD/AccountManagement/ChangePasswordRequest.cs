@@ -1,6 +1,6 @@
 using DotNet9EFAPI.MVCS.Models._base;
 
-namespace DotNet9EFAPI.MVCS.Models.CRUD.Identity;
+namespace DotNet9EFAPI.MVCS.Models.CRUD.AccountManagement;
 
 public class ChangePasswordRequest : BaseRequest
 {

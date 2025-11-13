@@ -1,4 +1,4 @@
-namespace DotNet9EFAPI.MVCS.Models.CRUD.Identity;
+namespace DotNet9EFAPI.MVCS.Models.CRUD.AccountManagement;
 
 public class CreateUserRequest
 {

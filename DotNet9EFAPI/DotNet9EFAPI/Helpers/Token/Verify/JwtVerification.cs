@@ -1,7 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using DotNet9EFAPI.MVCS.Models.CRUD.Identity;
+using DotNet9EFAPI.MVCS.Models.CRUD.AccountManagement;
 using DotNet9EFAPI.MVCS.Models.JWT;
 using Microsoft.IdentityModel.Tokens;
 

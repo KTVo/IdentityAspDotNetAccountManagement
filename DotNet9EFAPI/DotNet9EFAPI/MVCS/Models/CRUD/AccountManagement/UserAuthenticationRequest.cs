@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DotNet9EFAPI.MVCS.Models._base;
 
-namespace DotNet9EFAPI.MVCS.Models.CRUD.Identity;
+namespace DotNet9EFAPI.MVCS.Models.CRUD.AccountManagement;
 
 public class UserAuthenticationRequest : BaseRequest
 {
