@@ -26,19 +26,31 @@ public class IdentityUserAuthentication : ControllerBase
         _emailSender = emailSender  ?? throw new ArgumentNullException(nameof(emailSender));
     }
 
+    /// <summary>
+    /// LOGINS IN USER VIA USERNAME AND PASSWORD USING IDENTITY AND DATABASE
+    /// </summary>
+    /// <param name="loginUserRequest"></param>
+    /// <returns></returns>
     [HttpPost]
     [Route("login")]
     public async Task<IActionResult> LoginUser([FromBody] LoginUserRequest loginUserRequest)
     {
         if (loginUserRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(loginUserRequest)); }
-        if (loginUserRequest.Username == null) { return BadRequest(AppMessages.NullParameter + nameof(loginUserRequest.Username)); }
         if (loginUserRequest.Password == null) { return BadRequest(AppMessages.NullParameter + nameof(loginUserRequest.Password)); }
 
-        TokenResponse? userToken = await _identityUserSerivce.LogInUserAsync(loginUserRequest.Username, loginUserRequest.Password);
+        string chosenUsername = loginUserRequest.Username ?? loginUserRequest.Email ?? string.Empty;
+        if (chosenUsername == String.Empty) { return BadRequest(AppMessages.NullParameter + nameof(chosenUsername)); }
+        
+        TokenResponse? userToken = await _identityUserSerivce.LogInUserAsync(chosenUsername, loginUserRequest.Password);
 
         return Ok(userToken);
     }
 
+    /// <summary>
+    /// REGISTER USER USING IDENTITY AND DATABASE
+    /// </summary>
+    /// <param name="createUserRequest"></param>
+    /// <returns></returns>
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> SignUpUser([FromBody] CreateUserRequest createUserRequest)
@@ -84,12 +96,17 @@ public class IdentityUserAuthentication : ControllerBase
         return Ok(createUserResponse);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="userAuthenticationRequest"></param>
+    /// <returns></returns>
     [HttpPost]
     [Route("test/token")]
     public IActionResult TestToken([FromBody] UserAuthenticationRequest? userAuthenticationRequest)
     {
         if (userAuthenticationRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(userAuthenticationRequest)); }
-        if (userAuthenticationRequest.USToken == null) { return BadRequest(AppMessages.NullParameter + nameof(userAuthenticationRequest.USToken)); }
+        if (userAuthenticationRequest.JWTToken == null) { return BadRequest(AppMessages.NullParameter + nameof(userAuthenticationRequest.JWTToken)); }
 
         TokenValidateResponse response = _tokenProvider.ValidateToken(userAuthenticationRequest);
         
@@ -110,7 +127,7 @@ public class IdentityUserAuthentication : ControllerBase
     }
 
     [HttpPost]
-    [Route("update/user/password")]
+    [Route("update/password")]
     public async Task<IActionResult> UpdateUserPassword([FromBody] ChangePasswordRequest? changePasswordRequest)
     {
         if (changePasswordRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(changePasswordRequest)); }
@@ -124,7 +141,7 @@ public class IdentityUserAuthentication : ControllerBase
     }
     
     [HttpPost]
-    [Route("update/user/email")]
+    [Route("update/email")]
     public async Task<IActionResult> UpdateUserEmail([FromBody] ChangeEmailRequest? changeEmailRequest)
     {
         if (changeEmailRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(changeEmailRequest)); }
@@ -138,7 +155,7 @@ public class IdentityUserAuthentication : ControllerBase
     }
     
     [HttpPost]
-    [Route("update/user/phone/number")]
+    [Route("update/phone/number")]
     public async Task<IActionResult> UpdateUserPhoneNumber([FromBody] ChangePhoneNumberRequest? changePhoneNumberRequest)
     {
         if (changePhoneNumberRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(changePhoneNumberRequest)); }
@@ -152,7 +169,7 @@ public class IdentityUserAuthentication : ControllerBase
     }
     
     [HttpPost]
-    [Route("update/user/details")]
+    [Route("update/details")]
     public async Task<IActionResult> UpdateUserDetail([FromBody] ChangeUserRequest? changeUserRequest)
     {
         // NULL CHECKS - WILL CHECK FOR OTHER FIELDS IN THE SERVICE
@@ -168,12 +185,23 @@ public class IdentityUserAuthentication : ControllerBase
     
     [HttpPost]
     [Route("reset/password")]
-    public async Task<IActionResult> ResetPassword([FromBody] InitiatePasswordResetRequest? initiatePasswordResetRequest)
+    public async Task<IActionResult> ResetPassword([FromBody] RecoverPasswordRequest recoverPasswordRequest)
     {
-        if (initiatePasswordResetRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(initiatePasswordResetRequest)); }
-        if (initiatePasswordResetRequest.JWTToken == null) { return BadRequest(AppMessages.NullParameter + nameof(initiatePasswordResetRequest.JWTToken)); }
+        if (recoverPasswordRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(recoverPasswordRequest)); }
+        if (recoverPasswordRequest.JWTToken == null) { return BadRequest(AppMessages.NullParameter + nameof(recoverPasswordRequest.JWTToken)); }
 
-        InitiatePasswordResetResponse initialResetPasswordResponse = await _identityUserSerivce.RequestPasswordReset(initiatePasswordResetRequest);
+        InitiatePasswordResetResponse initialResetPasswordResponse = await _identityUserSerivce.ResetPasswordAsync(recoverPasswordRequest);
+        
+        if (initialResetPasswordResponse.IsSuccessful == false) { return BadRequest(initialResetPasswordResponse); }
+        
+        return Ok(initialResetPasswordResponse);
+    }
+    
+    [HttpPost]
+    [Route("request/reset/password")]
+    public async Task<IActionResult> RequestPasswordReset(InitiatePasswordResetRequest model)
+    {
+        var initialResetPasswordResponse = await _identityUserSerivce.RequestPasswordResetAsync(model);
         
         if (initialResetPasswordResponse.IsSuccessful == false) { return BadRequest(initialResetPasswordResponse); }
         
@@ -182,9 +210,9 @@ public class IdentityUserAuthentication : ControllerBase
     
     [HttpPost]
     [Route("test/send/email")]
-    public async Task<IActionResult> TestSendEmail(SendEmailRequest model)
+    public async Task<IActionResult> TestSendEmail()
     {
-        SendEmailResponse initialResetPasswordResponse = await _emailSender.SendEmailAsync(model);
+        SendEmailResponse initialResetPasswordResponse = await _emailSender.SendEmailAsync();
         
         if (initialResetPasswordResponse.IsSuccessful == false) { return BadRequest(initialResetPasswordResponse); }
         

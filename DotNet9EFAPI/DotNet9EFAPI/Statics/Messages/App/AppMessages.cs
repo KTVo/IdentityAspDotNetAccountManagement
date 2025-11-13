@@ -21,6 +21,8 @@ public static class AppMessages
     public const string NullEmailAddress = "EMAIL ADDRESS IS NULL: ";
     public const string NullEmailSubject = "I AM SUBJECT.";
     public const string EmailBody = "THANK YOU. I AM BODY.";
+    public const string EmailSentSuccessfully = "EMAIL SENT SUCCESSFULLY.";
+    public const string EmailSentFailed = "EMAIL SENT FAILED!";
     #endregion
 
     #region TOKEN_MESSAGES

@@ -5,5 +5,5 @@ namespace DotNet9EFAPI.MVCS.Services.Email;
 
 public interface ISmtpEmailService
 {
-    Task<SendEmailResponse> SendEmailAsync(SendEmailRequest model);
+    Task<SendEmailResponse> SendEmailAsync();
 }

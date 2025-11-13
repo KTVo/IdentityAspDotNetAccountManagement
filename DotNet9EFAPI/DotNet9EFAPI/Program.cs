@@ -24,7 +24,11 @@ if (string.IsNullOrWhiteSpace(jwtKey))     throw new Exception("Jwt:Secret was n
 if (string.IsNullOrWhiteSpace(jwtAudience))throw new Exception("Jwt:Audience was not provided.");
 
 // --- Services ---
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    });
 
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
@@ -71,8 +75,12 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+// SETTINGS FOR IDENTITY FRAMEWORK PASSWORD RESET
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromHours(2));
+
+// LOADS EMAIL SETTINGS FROM APP SETTINGS
 builder.Services.Configure<EmailSettings>(
-    builder.Configuration.GetSection("Email"));
+    builder.Configuration.GetSection("EmailSettings"));
 
 // App services (fix lifetimes + typed HttpClient)
 builder.Services
@@ -92,13 +100,25 @@ builder.Services.AddHttpClient<IRestService, RestService>(client =>
     }
 });
 
-var app = builder.Build();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("https://localhost:7227")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+WebApplication app = builder.Build();
 
 // --- Pipeline ---
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors();
+
 }
 
 app.UseHttpsRedirection();

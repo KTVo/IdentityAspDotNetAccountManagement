@@ -1,8 +1,7 @@
-using System.Net;
-using System.Net.Mail;
 using DotNet9EFAPI.MVCS.Models.Email;
 using DotNet9EFAPI.Statics.Messages.App;
 using Microsoft.Extensions.Options;
+using DotNet9EFAPI.Helpers.Email;
 
 namespace DotNet9EFAPI.MVCS.Services.Email;
 
@@ -10,51 +9,64 @@ public class SmtpEmailService : ISmtpEmailService
 {
     private readonly EmailSettings _emailSettings;
 
-    // NOTE IOptionsMonitor WILL NOTICE CHANGES IN APPSETTINGS.JSON WITHOUT RESTARTING THE APP
-    public SmtpEmailService(IOptionsMonitor<EmailSettings> emailSettings)
+    public SmtpEmailService(IOptions<EmailSettings> emailSettings)
     {
-        _emailSettings = emailSettings.CurrentValue ?? throw new ArgumentNullException(nameof(emailSettings));
+        _emailSettings = emailSettings.Value ?? throw new ArgumentNullException(nameof(emailSettings));
     }
 
-    public async Task<SendEmailResponse> SendEmailAsync(SendEmailRequest model)
-    {
-        try
+    /// <summary>
+    /// SENDS AN EMAIL TO OUR TESTING EMAIL ACCOUNT VIA SMTP
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public async Task<SendEmailResponse> SendEmailAsync()
         {
-            if (model.JWTToken == null) { return new SendEmailResponse { IsSuccessful = false, Message = AppMessages.NullParameter }; };
-            // TODO: VERIFY JWT TOKEN HERE
+            const string subject = "Test Email From New Web API!"; 
+            const string body = "<h1>This is a test email sent from the new .NET 9 Web API!</h1><p>If you received this email, the functionality works correctly.</p>"; 
             
-            // NULL CHECKS
-            if (string.IsNullOrEmpty(model.ToEmail) == true) { return new SendEmailResponse { IsSuccessful = false, Message = AppMessages.NullParameter }; };
-            if (string.IsNullOrEmpty(model.Subject) == true) { return new SendEmailResponse { IsSuccessful = false, Message = AppMessages.NullParameter }; };
-            if (string.IsNullOrEmpty(model.Body) == true) { return new SendEmailResponse { IsSuccessful = false, Message = AppMessages.NullParameter }; };
-            
-            // IMPORT SETTINGS FOR APPSETTINGS VIA MODEL CLASS EmailSettings
-            EmailSettings? smtpSection = _emailSettings;
-            
-            // NULL CHECKS
-            if (string.IsNullOrEmpty(smtpSection.HostEmail) == true) { return new SendEmailResponse { IsSuccessful = false, Message = AppMessages.NullParameter }; }
-            if (string.IsNullOrEmpty(smtpSection.HostEmailPassword) == true) { return new SendEmailResponse { IsSuccessful = false, Message = AppMessages.NullParameter }; }
-            if (string.IsNullOrEmpty(smtpSection.HostSmtpServer) == true) { return new SendEmailResponse { IsSuccessful = false, Message = AppMessages.NullParameter }; }
-            
-            // CREATES CLIENT TO SEND EMAIL
-            using var client = new SmtpClient(smtpSection.HostSmtpServer, smtpSection.HostSmtpServerPort)
-            {
-                EnableSsl = true,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(smtpSection.HostEmail, smtpSection.HostEmailPassword),
-                DeliveryMethod = SmtpDeliveryMethod.Network
-            };
+            try 
+            { 
+                // SET EMAIL REQUEST PROPERTIES
+                SendEmailRequest sendEmailRequest = new()
+                {
+                    Body = body,
+                    Subject = subject,
+                    FromEmail = _emailSettings.HostEmail ??
+                                throw new ArgumentNullException(nameof(_emailSettings.HostEmail)),
+                    Password = _emailSettings.HostEmailPassword ??
+                               throw new ArgumentNullException(nameof(_emailSettings.HostEmailPassword)),
+                    ToEmail = _emailSettings.TestToEmail ??
+                              throw new ArgumentNullException(nameof(_emailSettings.TestToEmail)),
+                    SmtpServer = _emailSettings.HostSmtpServer ??
+                                 throw new ArgumentNullException(nameof(_emailSettings.HostSmtpServer)),
+                    SmtpPort = _emailSettings.HostSmtpServerPort
+                };
+                
+                // SENDS AN EMAIL SMTP
+                bool emailSentSuccessfully = await SendEmailHelper.SendEmailAsync(sendEmailRequest);
 
-            var mail = new MailMessage(smtpSection.HostEmail, to: model.ToEmail, model.Subject, model.Body);
-            
-            // SENDS EMAIL
-            await client.SendMailAsync(mail);
-            
-            return new SendEmailResponse { IsSuccessful = true, Message = AppMessages.EmailSuccess };
+                if (emailSentSuccessfully == false)
+                {
+                    return new()
+                    {
+                        IsSuccessful = false,
+                        Message = AppMessages.EmailSentFailed
+                    };
+                }
+
+                return new()
+                {
+                    IsSuccessful = true,
+                    Message = AppMessages.EmailSentSuccessfully
+                };
+            } 
+            catch (Exception ex) 
+            { 
+                return new()
+                {
+                    IsSuccessful = false,
+                    Message = ex.Message
+                };
+            }
         }
-        catch (Exception ex)
-        {
-            return new SendEmailResponse { IsSuccessful = false, Message = ex.Message };
-        }
-    }
 }
