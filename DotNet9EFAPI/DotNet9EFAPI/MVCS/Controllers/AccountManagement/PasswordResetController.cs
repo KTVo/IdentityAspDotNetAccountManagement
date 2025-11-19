@@ -54,7 +54,13 @@ public class PasswordResetController : ControllerBase
     [Route("request/reset/password")]
     public async Task<IActionResult> RequestPasswordReset(InitiatePasswordResetRequest model)
     {
-        var initialResetPasswordResponse = await _passwordResetService.RequestPasswordResetAsync(model);
+        if (model == null) { return BadRequest(AppMessages.NullParameter + nameof(model)); }
+
+        if (string.IsNullOrEmpty(model.Username) == true && string.IsNullOrEmpty(model.Email) == true)
+        { return BadRequest(AppMessages.NullParameter); }
+   
+
+         InitiatePasswordResetResponse initialResetPasswordResponse = await _passwordResetService.RequestPasswordResetAsync(model);
         
         if (initialResetPasswordResponse.IsSuccessful == false) { return BadRequest(initialResetPasswordResponse); }
         

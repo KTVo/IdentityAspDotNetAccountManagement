@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace DotNet9EFAPI.MVCS.Services._DB.AccountManagement;
 
-public class RegisterAccountService : IRegistrationAccountService
+public sealed class RegisterAccountService : IRegistrationAccountService
 {
     // IDENTITY THAT OBJECT FOR MANAGING USER
     private readonly UserManager<User> _userManager;

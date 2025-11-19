@@ -18,7 +18,6 @@ internal sealed class TokenProvider : ITokenProvider
     private readonly IConfiguration? _configuration;
     private readonly IRestService? _restService;
 
-
     public TokenProvider(IConfiguration configuration, IRestService restService)
     {
         _configuration = configuration ?? throw new Exception(nameof(configuration));

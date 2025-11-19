@@ -4,5 +4,6 @@ namespace DotNet9EFAPI.MVCS.Models.CRUD.AccountManagement;
 
 public class RecoverPasswordRequest: BaseRequest
 {
-    public string? Passcode { get; set; }
+    public string? Email { get; set; }
+    public string? Username { get; set; }
 }

@@ -26,7 +26,7 @@ public class LoginAccountController : ControllerBase
     /// <param name="loginUserRequest"></param>
     /// <returns></returns>
     [HttpPost]
-    [Route("login")]
+    [Route("signin")]
     public async Task<IActionResult> LoginUser([FromBody] LoginUserRequest loginUserRequest)
     {
         if (loginUserRequest == null) { return BadRequest(AppMessages.NullParameter + nameof(loginUserRequest)); }

@@ -86,6 +86,7 @@ builder.Services
     .AddScoped<ITokenProvider, TokenProvider>()        // was Singleton; make Scoped to avoid transient dependency issues
     .AddScoped<IUpdateAccountDetailsService, UpdateAccountDetailsService>()
     .AddScoped<IRegistrationAccountService, RegisterAccountService>()
+    .AddScoped<IPasswordResetService, PasswordResetService>()
     .AddScoped<ILoginAccountService, LoginAccountService>()
     .AddScoped<ISmtpEmailService, SmtpEmailService>();
 

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNet9EFAPI.MVCS.Services._DB.AccountManagement;
 
-public class LoginAccountService : ILoginAccountService
+public sealed class LoginAccountService : ILoginAccountService
 {
     // IDENTITY THAT OBJECT FOR MANAGING USER
     private readonly UserManager<User> _userManager;
